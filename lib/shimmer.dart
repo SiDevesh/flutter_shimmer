@@ -63,6 +63,7 @@ class Shimmer extends StatefulWidget {
   final Gradient gradient;
   final int loop;
   final bool enabled;
+  final bool slanted;
 
   const Shimmer({
     Key key,
@@ -72,6 +73,7 @@ class Shimmer extends StatefulWidget {
     this.period = const Duration(milliseconds: 1500),
     this.loop = 0,
     this.enabled = true,
+    this.slanted = true,
   }) : super(key: key);
 
   ///
@@ -80,31 +82,42 @@ class Shimmer extends StatefulWidget {
   /// `highlightColor`.
   ///
   Shimmer.fromColors({
-    Key key,
-    @required this.child,
-    @required Color baseColor,
-    @required Color highlightColor,
-    this.period = const Duration(milliseconds: 1500),
-    this.direction = ShimmerDirection.ltr,
-    this.loop = 0,
-    this.enabled = true,
-  })  : gradient = LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.centerRight,
-            colors: <Color>[
-              baseColor,
-              baseColor,
-              highlightColor,
-              baseColor,
-              baseColor
-            ],
-            stops: const <double>[
-              0.0,
-              0.35,
-              0.5,
-              0.65,
-              1.0
-            ]),
+      Key key,
+      @required this.child,
+      @required Color baseColor,
+      @required Color highlightColor,
+      this.period = const Duration(milliseconds: 1500),
+      this.direction = ShimmerDirection.ltr,
+      this.loop = 0,
+      this.enabled = true,
+      this.slanted = true,
+    })  : gradient = LinearGradient(
+          begin: slanted
+            ? Alignment.topLeft
+            : direction == ShimmerDirection.ltr ||
+                  direction == ShimmerDirection.rtl
+              ? Alignment.centerLeft
+              : Alignment.topCenter,
+          end: slanted
+            ? Alignment.centerRight
+            : direction == ShimmerDirection.ltr ||
+                  direction == ShimmerDirection.rtl
+              ? Alignment.centerRight
+              : Alignment.bottomCenter,
+          colors: <Color>[
+            baseColor,
+            baseColor,
+            highlightColor,
+            baseColor,
+            baseColor
+          ],
+          stops: const <double>[
+          0.0,
+          0.35,
+          0.5,
+          0.65,
+          1.0
+        ]),
         super(key: key);
 
   @override
@@ -143,9 +156,9 @@ class _ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
           _controller.forward(from: 0.0);
         }
       });
-    if (widget.enabled) {
-      _controller.forward();
-    }
+      if (widget.enabled) {
+        _controller.forward();
+      }
   }
 
   @override
@@ -190,7 +203,7 @@ class _Shimmer extends SingleChildRenderObjectWidget {
     this.percent,
     this.direction,
     this.gradient,
-  }) : super(child: child);
+    }) : super(child: child);
 
   @override
   _ShimmerFilter createRenderObject(BuildContext context) {
